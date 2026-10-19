@@ -42,7 +42,7 @@ function Home() {
             <Atom className="h-24 w-24 shrink-0" />
           </div>
           <div className="mt-7 flex flex-col items-start gap-3">
-            <Link to={user ? "/workspace" : "/auth"} search={user ? { t: undefined } : undefined} className="inline-flex items-center gap-3 rounded-2xl bg-primary px-6 py-4 font-bold text-primary-foreground shadow-lg">
+            <Link to={user ? "/workspace" : "/auth"} search={{ t: undefined } as never} className="inline-flex items-center gap-3 rounded-2xl bg-primary px-6 py-4 font-bold text-primary-foreground shadow-lg">
               Continue learning <ArrowRight className="h-5 w-5" />
             </Link>
             <Link to="/interview" className="inline-flex items-center gap-3 rounded-2xl border bg-card px-6 py-4 font-bold">
