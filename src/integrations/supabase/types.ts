@@ -14,13 +14,327 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      chat_messages: {
+        Row: {
+          citations: Json
+          content: string
+          created_at: string
+          grounded: boolean
+          id: string
+          lesson_id: string
+          retrieved: Json
+          role: string
+          user_id: string
+          watched_up_to_sec: number
+        }
+        Insert: {
+          citations?: Json
+          content: string
+          created_at?: string
+          grounded?: boolean
+          id?: string
+          lesson_id: string
+          retrieved?: Json
+          role: string
+          user_id?: string
+          watched_up_to_sec?: number
+        }
+        Update: {
+          citations?: Json
+          content?: string
+          created_at?: string
+          grounded?: boolean
+          id?: string
+          lesson_id?: string
+          retrieved?: Json
+          role?: string
+          user_id?: string
+          watched_up_to_sec?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_messages_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lessons: {
+        Row: {
+          created_at: string
+          duration_sec: number
+          id: string
+          note: string
+          source: string
+          summary: string
+          title: string
+          youtube_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          duration_sec?: number
+          id?: string
+          note?: string
+          source?: string
+          summary?: string
+          title: string
+          youtube_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          duration_sec?: number
+          id?: string
+          note?: string
+          source?: string
+          summary?: string
+          title?: string
+          youtube_id?: string | null
+        }
+        Relationships: []
+      }
+      quiz_attempts: {
+        Row: {
+          correct: boolean
+          created_at: string
+          id: string
+          question_id: string
+          user_id: string
+        }
+        Insert: {
+          correct: boolean
+          created_at?: string
+          id?: string
+          question_id: string
+          user_id?: string
+        }
+        Update: {
+          correct?: boolean
+          created_at?: string
+          id?: string
+          question_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_attempts_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "quiz_questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quiz_questions: {
+        Row: {
+          answer_index: number
+          explanation: string
+          id: string
+          lesson_id: string
+          options: Json
+          question: string
+          source_start_sec: number
+          topic_marker_id: string | null
+        }
+        Insert: {
+          answer_index: number
+          explanation?: string
+          id?: string
+          lesson_id: string
+          options: Json
+          question: string
+          source_start_sec?: number
+          topic_marker_id?: string | null
+        }
+        Update: {
+          answer_index?: number
+          explanation?: string
+          id?: string
+          lesson_id?: string
+          options?: Json
+          question?: string
+          source_start_sec?: number
+          topic_marker_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_questions_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quiz_questions_topic_marker_id_fkey"
+            columns: ["topic_marker_id"]
+            isOneToOne: false
+            referencedRelation: "topic_markers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      revision_items: {
+        Row: {
+          due_at: string
+          ease: number
+          id: string
+          interval_days: number
+          last_result: string | null
+          topic_marker_id: string
+          user_id: string
+        }
+        Insert: {
+          due_at?: string
+          ease?: number
+          id?: string
+          interval_days?: number
+          last_result?: string | null
+          topic_marker_id: string
+          user_id?: string
+        }
+        Update: {
+          due_at?: string
+          ease?: number
+          id?: string
+          interval_days?: number
+          last_result?: string | null
+          topic_marker_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "revision_items_topic_marker_id_fkey"
+            columns: ["topic_marker_id"]
+            isOneToOne: false
+            referencedRelation: "topic_markers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      topic_markers: {
+        Row: {
+          id: string
+          lesson_id: string
+          start_sec: number
+          summary: string
+          title: string
+        }
+        Insert: {
+          id?: string
+          lesson_id: string
+          start_sec: number
+          summary?: string
+          title: string
+        }
+        Update: {
+          id?: string
+          lesson_id?: string
+          start_sec?: number
+          summary?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "topic_markers_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      transcript_chunks: {
+        Row: {
+          end_sec: number
+          id: string
+          lesson_id: string
+          start_sec: number
+          text: string
+          tsv: unknown
+        }
+        Insert: {
+          end_sec: number
+          id?: string
+          lesson_id: string
+          start_sec: number
+          text: string
+          tsv?: unknown
+        }
+        Update: {
+          end_sec?: number
+          id?: string
+          lesson_id?: string
+          start_sec?: number
+          text?: string
+          tsv?: unknown
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transcript_chunks_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_progress: {
+        Row: {
+          lesson_id: string
+          max_watched_sec: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          lesson_id: string
+          max_watched_sec?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          lesson_id?: string
+          max_watched_sec?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_progress_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      match_chunks: {
+        Args: {
+          _lesson: string
+          _limit?: number
+          _query: string
+          _upto: number
+        }
+        Returns: {
+          end_sec: number
+          id: string
+          rank: number
+          start_sec: number
+          text: string
+        }[]
+      }
+      match_later: {
+        Args: { _lesson: string; _query: string; _upto: number }
+        Returns: {
+          start_sec: number
+          title: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
