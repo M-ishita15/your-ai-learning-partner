@@ -32,14 +32,14 @@ function AuthPage() {
         ? await supabase.auth.signInWithPassword({ email, password })
         : await supabase.auth.signUp({ email, password, options: { emailRedirectTo: window.location.origin } });
     setBusy(false);
-    if (error) return toast.error(error.message);
-    if (mode === "up" && !data.session) return toast.success("Check your email to confirm your account.");
+    if (error) { toast.error(error.message); return; }
+    if (mode === "up" && !data.session) { toast.success("Check your email to confirm your account."); return; }
     navigate({ to: "/" });
   }
 
   async function oauth(p: "google" | "lovable") {
     const r = await lovable.auth.signInWithOAuth(p, { redirect_uri: window.location.origin });
-    if (r.error) return toast.error(String(r.error.message ?? r.error));
+    if (r.error) { toast.error(String(r.error.message ?? r.error)); return; }
     if (r.redirected) return;
     navigate({ to: "/" });
   }

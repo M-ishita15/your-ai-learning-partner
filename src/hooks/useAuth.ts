@@ -17,7 +17,7 @@ export function useAuth() {
 }
 
 export function initials(user: User | null) {
-  const name = (user?.user_metadata?.full_name as string) || user?.email || "?";
+  const name = (user?.user_metadata?.['full_name'] as string) || user?.email || "?";
   return name
     .split(/[\s@.]+/)
     .filter(Boolean)
