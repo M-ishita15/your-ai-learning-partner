@@ -1,0 +1,27 @@
+import { useEffect, useState } from "react";
+import type { User } from "@supabase/supabase-js";
+import { supabase } from "@/integrations/supabase/client";
+
+export function useAuth() {
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      setUser(data.user);
+      setLoading(false);
+    });
+    const { data } = supabase.auth.onAuthStateChange((_e, s) => setUser(s?.user ?? null));
+    return () => data.subscription.unsubscribe();
+  }, []);
+  return { user, loading };
+}
+
+export function initials(user: User | null) {
+  const name = (user?.user_metadata?.full_name as string) || user?.email || "?";
+  return name
+    .split(/[\s@.]+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((p) => p[0]!.toUpperCase())
+    .join("");
+}
