@@ -4,6 +4,7 @@ Lesson video: the lecture shown in your screenshots — MIT OpenCourseWare 8.04 
 
 ## Phase 1 (this round)
 - Recreate the look from your screenshots: soft mint/teal palette, deep teal buttons, monospace eyebrow labels, rounded cards, atom illustration, dark bottom nav (Home, Workspace, Interview, Revise, History), breadcrumb header with avatar.
+- Works on phone and computer: phone keeps the bottom nav; on computer the nav moves to a left sidebar and pages use wider layouts (e.g. Workspace shows video + markers on the left, tutor chat on the right).
 - Sign in with email and Google.
 - Lesson data stored in Lovable Cloud: lesson, transcript chunks (~25s), topic markers (0:00, 3:30, 10:50), 8 quiz questions.
 - Home: real progress %, practice score, items due, Continue learning card, learning pulse (streak, mastered vs needs-work).
