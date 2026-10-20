@@ -4,6 +4,7 @@ import { ArrowRight, BookOpen, Flame, Headphones, ListChecks, Target } from "luc
 import { AppShell, Atom } from "@/components/AppShell";
 import { useAuth } from "@/hooks/useAuth";
 import { loadLesson, loadStats } from "@/lib/learning";
+import { LessonImport } from "@/components/LessonImport";
 import { fmt } from "@/lib/time";
 
 export const Route = createFileRoute("/")({
@@ -27,7 +28,7 @@ function Home() {
   const s = statsQ.data;
   const pct = lesson && s ? Math.min(100, Math.round((s.maxWatched / lesson.duration_sec) * 100)) : 0;
   const next = s?.due[0] as { topic_markers: { title: string; start_sec: number } | null } | undefined;
-  const mastered = markers.length - (s?.needsWork ?? 0);
+  const mastered = s?.mastered ?? 0;
 
   return (
     <AppShell crumb="Overview" wide>
@@ -67,6 +68,7 @@ function Home() {
         )}
       </div>
 
+      <LessonImport />
       <div className="mt-10 grid gap-6 lg:grid-cols-2">
         <section>
           <div className="mb-3 flex items-center justify-between">
@@ -96,11 +98,12 @@ function Home() {
           <div>
             <div className="mb-3 flex items-center justify-between"><h3 className="font-extrabold">Recently active</h3><Link to="/history" className="text-sm font-bold text-secondary-foreground">History →</Link></div>
             <div className="card-soft p-5 text-sm text-muted-foreground">
-              {s?.attempts.length ? `${s.attempts.length} practice answers · last on ${new Date(s.attempts[0]!.created_at).toLocaleDateString()}` : "Your practice and interview sessions will appear here as you work."}
+              {s?.attempts.length ? `${s.attempts.length} practice answers · last on ${new Date(s.attempts[0]?.created_at ?? Date.now()).toLocaleDateString()}` : "Your practice and interview sessions will appear here as you work."}
             </div>
           </div>
         </section>
       </div>
+      {user && s?.interviews[0] && <p className="mt-5 text-sm text-muted-foreground">Last interview · {new Date(s.interviews[0].created_at).toLocaleDateString()} · {s.interviews[0].status}</p>}
     </AppShell>
   );
 }

@@ -1,6 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { AppShell } from "@/components/AppShell";
+import { Button } from "@/components/ui/button";
+import { ScorecardSchema } from "@/lib/lesson-content";
 import { loadStats } from "@/lib/learning";
 
 export const Route = createFileRoute("/_authenticated/history")({
@@ -49,6 +51,14 @@ function History() {
           )}
         </section>
       </div>
+      <section className="mt-8 border-t pt-6"><h2 className="text-xl font-bold">Saved interviews</h2>
+        {data?.interviews.length ? <div className="mt-4 divide-y">{data.interviews.map(session => {
+          const card = ScorecardSchema.safeParse(session.scorecard);
+          const average = card.success ? (card.data.scores.reduce((sum, score) => sum + score.value, 0) / 4).toFixed(1) : null;
+          return <div key={session.id} className="flex flex-wrap items-center justify-between gap-3 py-4"><div><b>{average ? `${average}/5 · Interview complete` : 'Interview in progress'}</b><p className="text-sm text-muted-foreground">{new Date(session.created_at).toLocaleString()}</p></div><Button asChild variant="secondary"><Link to="/interview" search={{ lesson: session.lesson_id, session: session.id }}>{average ? 'View scorecard' : 'Continue'} →</Link></Button></div>;
+        })}</div> : <p className="mt-3 text-sm text-muted-foreground">No interviews saved yet.</p>}
+      </section>
+      <section className="mt-8 border-t pt-6"><h2 className="text-xl font-bold">Recent quiz answers</h2><div className="mt-3 divide-y">{attempts.slice(0, 30).map((a, i) => <div key={`${a.created_at}-${i}`} className="flex justify-between gap-3 py-3 text-sm"><span>{a.correct ? 'Correct' : 'Needs revision'}</span><time className="text-muted-foreground">{new Date(a.created_at).toLocaleString()}</time></div>)}</div></section>
     </AppShell>
   );
 }
