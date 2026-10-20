@@ -5,7 +5,7 @@ import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware';
 import { GeneratedLesson, parseTranscript, youtubeId, ScorecardSchema, validateScorecard } from './lesson-content';
 import type { Database, Json } from '@/integrations/supabase/types';
 
-const lessonInput = z.object({ lessonId: z.string().uuid() });
+const lessonInput = z.object({ lessonId: z.string().guid() });
 const questionSchema = z.object({ questions: z.array(z.object({ question: z.string(), topic_id: z.string() })) });
 
 export const startInterview = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
@@ -24,7 +24,7 @@ export const startInterview = createServerFn({ method: 'POST' }).middleware([req
   });
 
 export const answerInterview = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
-  .inputValidator(d => z.object({ sessionId: z.string().uuid(), index: z.number().int().min(0).max(2), answer: z.string().trim().min(2).max(6000) }).parse(d))
+  .inputValidator(d => z.object({ sessionId: z.string().guid(), index: z.number().int().min(0).max(2), answer: z.string().trim().min(2).max(6000) }).parse(d))
   .handler(async ({ data, context }) => {
     const db = context.supabase;
     const { data: session, error } = await db.from('interview_sessions').select('*').eq('id', data.sessionId).single();
@@ -45,7 +45,7 @@ export const answerInterview = createServerFn({ method: 'POST' }).middleware([re
   });
 
 export const scoreInterview = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
-  .inputValidator(d => z.object({ sessionId: z.string().uuid() }).parse(d)).handler(async ({ data, context }) => {
+  .inputValidator(d => z.object({ sessionId: z.string().guid() }).parse(d)).handler(async ({ data, context }) => {
     const db = context.supabase;
     const { data: session, error } = await db.from('interview_sessions').select('*').eq('id', data.sessionId).single();
     if (error || !session) throw new Error('Interview not found.');
@@ -66,7 +66,7 @@ export const scoreInterview = createServerFn({ method: 'POST' }).middleware([req
   });
 
 export const shareScorecard = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
-  .inputValidator(d => z.object({ sessionId: z.string().uuid() }).parse(d)).handler(async ({ data, context }) => {
+  .inputValidator(d => z.object({ sessionId: z.string().guid() }).parse(d)).handler(async ({ data, context }) => {
     const db = context.supabase;
     const { data: existing, error } = await db.from('shared_scorecards').select('token').eq('session_id', data.sessionId).maybeSingle();
     if (error) throw new Error(error.message);
@@ -77,7 +77,7 @@ export const shareScorecard = createServerFn({ method: 'POST' }).middleware([req
   });
 
 export const readSharedScorecard = createServerFn({ method: 'GET' })
-  .inputValidator(d => z.object({ token: z.string().uuid() }).parse(d)).handler(async ({ data }) => {
+  .inputValidator(d => z.object({ token: z.string().guid() }).parse(d)).handler(async ({ data }) => {
     const url = process.env['SUPABASE_URL'];
     const key = process.env['SUPABASE_PUBLISHABLE_KEY'];
     if (!url || !key) throw new Error('Shared results are unavailable.');
@@ -93,7 +93,7 @@ export const readSharedScorecard = createServerFn({ method: 'GET' })
 
 const feedbackSchema = z.object({ score: z.number(), evidence: z.string(), transcript_evidence: z.string(), feedback: z.string(), tip: z.string() });
 export const explainBack = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
-  .inputValidator(d => z.object({ lessonId: z.string().uuid(), topicId: z.string().uuid(), answer: z.string().trim().min(2).max(6000) }).parse(d))
+  .inputValidator(d => z.object({ lessonId: z.string().guid(), topicId: z.string().guid(), answer: z.string().trim().min(2).max(6000) }).parse(d))
   .handler(async ({ data, context }) => {
     const { watchedContent, reserve, reviseTopic } = await import('./practice.server');
     const content = await watchedContent(context.supabase, data.lessonId);
@@ -113,7 +113,7 @@ export const explainBack = createServerFn({ method: 'POST' }).middleware([requir
   });
 
 export const importLesson = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
-  .inputValidator(d => z.object({ title: z.string().trim().min(2).max(200), source: z.string().trim().max(200), youtube: z.string().max(1000), transcript: z.string().max(120000), replaceId: z.string().uuid().nullable() }).parse(d))
+  .inputValidator(d => z.object({ title: z.string().trim().min(2).max(200), source: z.string().trim().max(200), youtube: z.string().max(1000), transcript: z.string().max(120000), replaceId: z.string().guid().nullable() }).parse(d))
   .handler(async ({ data, context }) => {
     if (data.replaceId) {
       const { data: admin, error } = await context.supabase.rpc('has_role', { _user_id: context.userId, _role: 'admin' });
