@@ -14,6 +14,7 @@ export const Route = createFileRoute("/")({
       { name: "description", content: "A timestamp-aware AI tutor that answers only from what you've watched, then runs a mock interview." },
       { property: "og:title", content: "Coherence — Your AI path to instant clarity" },
       { property: "og:description", content: "Learn, ask better questions, practice, and feel ready to explain it." },
+      { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: Home,

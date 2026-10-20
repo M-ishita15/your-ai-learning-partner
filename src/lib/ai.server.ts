@@ -21,7 +21,7 @@ export async function structured<T>(schema: z.ZodType<T>, instructions: string, 
   const apiKey = process.env['LOVABLE_API_KEY'];
   if (!apiKey) throw new Error('AI is not configured.');
   const gateway = createLovableAiGatewayRunIdFetch(getLovableAiGatewayRunId(getRequest()));
-  let safeError: { status: number; message: string } | undefined;
+  let safeError: { status: number; message: string; retryAfterMs: number } | undefined;
   const provider = createOpenAI({
     baseURL: 'https://ai.gateway.lovable.dev/v1', apiKey,
     headers: { 'Lovable-API-Key': apiKey, 'X-Lovable-AIG-SDK': 'vercel-ai-sdk' },
@@ -30,7 +30,7 @@ export async function structured<T>(schema: z.ZodType<T>, instructions: string, 
       res.headers.forEach((value, key) => { if (key.toLowerCase().startsWith('x-lovable-aig-')) setResponseHeader(key, value); });
       if (!res.ok) {
         const body = await res.clone().json().catch(() => null) as { message?: string; error?: { message?: string } } | null;
-        safeError = { status: res.status, message: body?.message ?? body?.error?.message ?? `AI request failed (${res.status}).` };
+        safeError = { status: res.status, message: body?.message ?? body?.error?.message ?? `AI request failed (${res.status}).`, retryAfterMs: Math.max(0,Number(res.headers.get("Retry-After") ?? 0)*1000) };
         if (res.status === 402 || res.status === 403) {
           await supabaseAdmin.from('ai_access_state').upsert({ id: 'gateway', status: res.status, message: safeError.message, updated_at: new Date().toISOString() });
         }
@@ -50,7 +50,7 @@ export async function structured<T>(schema: z.ZodType<T>, instructions: string, 
     } catch (error) {
       if (safeError) {
         if (attempt === 0 && (safeError.status === 429 || safeError.status >= 500)) {
-          await new Promise(resolve => setTimeout(resolve, 1500)); safeError = undefined; continue;
+          await new Promise(resolve => setTimeout(resolve, Math.max(safeError?.retryAfterMs ?? 0, 1500 + Math.random()*1000))); safeError = undefined; continue;
         }
         throw new Error(safeError.message);
       }

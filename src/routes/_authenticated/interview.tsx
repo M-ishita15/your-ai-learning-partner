@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from '@tanstack/react-router';
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useServerFn } from '@tanstack/react-start';
 import { useState } from 'react';
@@ -23,6 +23,7 @@ function Interview() {
   const search = Route.useSearch();
   const lessonId = search.lesson ?? SEED_LESSON_ID;
   const qc = useQueryClient();
+  const navigate = useNavigate();
   const start = useServerFn(startInterview), save = useServerFn(answerInterview), score = useServerFn(scoreInterview), share = useServerFn(shareScorecard);
   const [sessionId, setSessionId] = useState(search.session);
   const [answer, setAnswer] = useState('');
@@ -47,10 +48,10 @@ function Interview() {
   return <AppShell crumb="Mock interview" wide>
     <p className="eyebrow">Make the idea your own</p><h1 className="mt-2 text-4xl font-extrabold">Mock interview</h1>
     <p className="mt-3 text-muted-foreground">{lesson.data?.lesson.title} · Watched up to {fmt(stats.data?.maxWatched ?? 0)}</p>
-    {!sessionId ? <section className="mt-8 max-w-2xl space-y-5"><h2 className="text-xl font-bold">Three questions. One step closer.</h2><Button disabled={busy} onClick={() => run(async () => { const s = await start({ data: { lessonId } }); setSessionId(s.id); })}>{busy ? 'Preparing questions…' : 'Start interview'}<ArrowRight /></Button></section>
+    {!sessionId ? <section className="mt-8 max-w-2xl space-y-5"><h2 className="text-xl font-bold">Three questions. One step closer.</h2><Button disabled={busy} onClick={() => run(async () => { const s = await start({ data: { lessonId } }); setSessionId(s.id); await navigate({ to: "/interview", search: { lesson: lessonId, session: s.id }, replace: true }); })}>{busy ? 'Preparing questions…' : 'Start interview'}<ArrowRight /></Button></section>
       : session.isLoading || turns.isLoading ? <div className="mt-8 h-48 animate-pulse rounded bg-muted" />
       : session.isError || turns.isError ? <p role="alert" className="mt-6 text-destructive">Could not load this interview.</p>
-      : card.success ? <><Scorecard card={card.data} lessonId={lessonId} /><div className="mt-6 flex flex-wrap gap-3"><Button variant="outline" disabled={busy} onClick={() => run(async () => { const token = await share({ data: { sessionId } }); const url = `${window.location.origin}/scorecard/${token}`; setShareUrl(url); await navigator.clipboard?.writeText(url).catch(() => undefined); toast.success('Read-only share link ready.'); })}><Share2 />Share scorecard</Button><Button onClick={() => { setSessionId(undefined); setShareUrl(''); }}>New interview</Button></div>{shareUrl && <a className="mt-3 block break-all text-sm text-teal underline" href={shareUrl}>{shareUrl}</a>}</>
+      : card.success ? <><Scorecard card={card.data} lessonId={lessonId} /><div className="mt-6 flex flex-wrap gap-3"><Button variant="outline" disabled={busy} onClick={() => run(async () => { const token = await share({ data: { sessionId } }); const url = `${window.location.origin}/scorecard/${token}`; setShareUrl(url); await navigator.clipboard?.writeText(url).catch(() => undefined); toast.success('Read-only share link ready.'); })}><Share2 />Share scorecard</Button><Button onClick={() => { setSessionId(undefined); setShareUrl(''); navigate({ to: '/interview', search: { lesson: lessonId, session: undefined }, replace: true }); }}>New interview</Button></div>{shareUrl && <a className="mt-3 block break-all text-sm text-teal underline" href={shareUrl}>{shareUrl}</a>}</>
       : index >= 3 ? <section className="mt-8"><h2 className="text-xl font-bold">All three answers are saved.</h2><Button className="mt-4" disabled={busy} onClick={() => run(finish)}>{busy ? 'Reviewing your answers…' : 'Get scorecard'}</Button></section>
       : <section className="mt-8 max-w-3xl"><p className="eyebrow">Question {index + 1} / 3</p><h2 className="mt-3 text-2xl font-bold">{questions[index]?.question}</h2><form className="mt-5" onSubmit={e => { e.preventDefault(); run(async () => { await save({ data: { sessionId, index, answer } }); setAnswer(''); speech.listening && speech.toggle(); await qc.invalidateQueries({ queryKey: ['turns', sessionId] }); if (index === 2) await finish(); }); }}><textarea aria-label="Your interview answer" required minLength={2} maxLength={6000} value={answer} onChange={e => setAnswer(e.target.value)} className="min-h-48 w-full rounded-lg border bg-card p-4" placeholder="Your answer…" /><div className="mt-3 flex items-center justify-between gap-3"><Button type="button" size="icon" variant="outline" aria-label={speech.listening ? 'Stop microphone' : 'Voice answer'} title={speech.supported ? 'Voice answer' : 'Voice input unavailable; type your answer'} disabled={!speech.supported || busy} onClick={speech.toggle}>{speech.listening ? <Square /> : <Mic />}</Button><Button disabled={busy || answer.trim().length < 2}>{busy ? 'Saving…' : index === 2 ? 'Finish interview' : 'Next question'}<ArrowRight /></Button></div></form></section>}
     <Button className="mt-8" asChild variant="link"><Link to="/history">Saved interviews →</Link></Button>
