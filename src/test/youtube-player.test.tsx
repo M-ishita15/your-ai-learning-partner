@@ -15,11 +15,10 @@ describe("YouTube player readiness", () => {
     const instances: Array<{ ready: () => void; seekTo: ReturnType<typeof vi.fn>; playVideo: ReturnType<typeof vi.fn>; destroy: ReturnType<typeof vi.fn>; mount: HTMLElement }> = [];
     const Constructor: NonNullable<Window["YT"]>["Player"] = class {
       destroy = vi.fn();
-      constructor(mount: HTMLElement, options: Parameters<InstanceType<typeof Constructor>["configure"]>[0]) {
+      constructor(mount: HTMLElement, options: ConstructorParameters<NonNullable<Window["YT"]>["Player"]>[1]) {
         const seekTo = vi.fn(), playVideo = vi.fn();
         instances.push({ mount, destroy: this.destroy, seekTo, playVideo, ready: () => options.events.onReady({ target: { seekTo, playVideo } }) });
       }
-      configure(_options: { events: { onReady: (event: { target: { seekTo: ReturnType<typeof vi.fn>; playVideo: ReturnType<typeof vi.fn> } }) => void } }) {}
     };
     window.YT = { Player: Constructor };
     let controls: ReturnType<typeof useYouTubePlayer> | undefined;

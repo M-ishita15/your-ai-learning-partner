@@ -83,7 +83,10 @@ export function useYouTubePlayer(videoId: string | null | undefined, start: numb
       active = false;
       player.current = null;
       instance?.destroy?.();
-      if (window.onYouTubeIframeAPIReady === apiReady) window.onYouTubeIframeAPIReady = previousReady;
+      if (window.onYouTubeIframeAPIReady === apiReady) {
+        if (previousReady) window.onYouTubeIframeAPIReady = previousReady;
+        else delete window.onYouTubeIframeAPIReady;
+      }
     };
   }, [videoId, seek]);
 
