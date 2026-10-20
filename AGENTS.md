@@ -17,3 +17,4 @@
 
 - Retain old topic and quiz rows as inactive on transcript replacement so learning history remains readable; normal lesson fetches filter active rows.
 - Verify session ownership through user-scoped reads before privileged interview/result writes; direct client writes cannot forge completed scores.
+- Transcript-only lessons advance through an ordered reading RPC; this is separate from video playback so imported text remains usable without pretending it was watched.

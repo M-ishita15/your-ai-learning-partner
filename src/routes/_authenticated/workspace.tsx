@@ -9,7 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { loadLesson, loadStats } from "@/lib/learning";
 import { fmt, SEED_LESSON_ID } from "@/lib/time";
 import { Button } from "@/components/ui/button";
-import { savePlayback, submitQuiz } from "@/lib/learning.functions";
+import { savePlayback, saveReading, submitQuiz } from "@/lib/learning.functions";
 import { generatePractice } from "@/lib/practice.functions";
 import { askTutor, whereLater, type TutorReply } from "@/lib/tutor.functions";
 
@@ -36,6 +36,7 @@ function Workspace() {
   const { t, lesson: selected } = Route.useSearch();
   const lessonId = selected ?? SEED_LESSON_ID;
   const savePosition = useServerFn(savePlayback);
+  const read = useServerFn(saveReading);
   const qc = useQueryClient();
   const { data } = useQuery({ queryKey: ["lesson", lessonId], queryFn: () => loadLesson(lessonId) });
   const stats = useQuery({ queryKey: ["stats", lessonId], queryFn: () => loadStats(lessonId) });
@@ -94,7 +95,7 @@ function Workspace() {
   if (!data) return <AppShell crumb="Learning workspace" wide><div className="h-64 animate-pulse rounded-3xl bg-muted" /></AppShell>;
   const { lesson, markers, chunks } = data;
   const marker = [...markers].reverse().find((m) => m.start_sec <= now) ?? markers[0];
-  const chunk = [...chunks].reverse().find((c) => c.start_sec <= now) ?? chunks[0];
+  const chunk = lesson.youtube_id ? [...chunks].reverse().find((c) => c.start_sec <= now) ?? chunks[0] : chunks.find(c => c.end_sec > watched) ?? chunks.at(-1);
 
   return (
     <AppShell crumb="Learning workspace" wide>
@@ -123,7 +124,7 @@ function Workspace() {
 
           <section className="grid gap-4 sm:grid-cols-2">
             <div className="card-soft p-5"><p className="eyebrow">Lesson note</p><h3 className="mt-2 font-extrabold">{marker?.title}</h3><p className="mt-2 text-sm text-muted-foreground">{lesson.note}</p></div>
-            <div className="card-soft p-5"><p className="eyebrow">Transcript excerpt · {fmt(chunk?.start_sec ?? 0)}</p><p className="mt-2 text-sm">{chunk?.text}</p></div>
+            <div className="card-soft p-5"><p className="eyebrow">Transcript excerpt · {fmt(chunk?.start_sec ?? 0)}</p><p className="mt-2 text-sm">{chunk?.text}</p>{!lesson.youtube_id && chunk && chunk.end_sec > watched && <Button className="mt-3" onClick={async () => { try { const position = await read({ data: { lessonId, start: chunk.start_sec } }); setWatched(position); watchedRef.current=position; setNow(position); await qc.invalidateQueries({ queryKey: ["stats"] }); } catch (e) { toast.error(e instanceof Error ? e.message : "Could not save reading progress."); } }}>Mark segment read</Button>}</div>
           </section>
 
           <section className="card-soft p-5">
