@@ -21,6 +21,7 @@ export const Route = createFileRoute("/_authenticated/workspace")({
       { name: "description", content: "Watch the lecture, practice, and ask the spoiler-proof tutor." },
       { property: "og:title", content: "Learning workspace · Coherence" },
       { property: "og:description", content: "Watch the lecture, practice, and ask the spoiler-proof tutor." },
+      { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: Workspace,
@@ -105,10 +106,10 @@ function Workspace() {
         <LessonOptions selected={lessonId} />
       </select>
       {lesson.transcript_status === "sample" && <p className="mt-3 rounded-lg bg-warn p-3 text-sm text-warn-foreground">Sample transcript — not verified captions. Learning feedback uses this sample until an admin provides the actual transcript.</p>}
-      <div className="mt-6 grid gap-6 lg:grid-cols-[1.5fr_1fr]">
-        <div className="space-y-6">
+      <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
+        <div className="min-w-0 space-y-6">
           <section className="card-soft overflow-hidden">
-            <div className="aspect-video bg-nav">{lesson.youtube_id ? <div ref={host} className="h-full w-full" /> : <div className="flex h-full items-center justify-center px-5 text-center text-primary-foreground">Transcript-only lesson</div>}</div>
+            <div className="aspect-video bg-nav">{lesson.youtube_id ? <div ref={host} className="h-full w-full [&_iframe]:h-full [&_iframe]:w-full" /> : <div className="flex h-full items-center justify-center px-5 text-center text-primary-foreground">Transcript-only lesson</div>}</div>
             <div className="p-5">
               <p className="eyebrow">{lesson.source}</p>
               <h2 className="mt-1 text-xl font-extrabold">{lesson.title}</h2>
@@ -129,7 +130,7 @@ function Workspace() {
             <p className="eyebrow">Topic markers · {fmt(lesson.duration_sec)}</p>
             <div className="mt-3 divide-y">
               {markers.map((m) => (
-                <Button variant="ghost" key={m.id} onClick={() => seek(m.start_sec)} className={`grid w-full grid-cols-[3.5rem_minmax(0,1fr)] gap-3 py-3 text-left ${marker?.id === m.id ? "text-primary" : ""}`}>
+                <Button variant="ghost" key={m.id} onClick={() => seek(m.start_sec)} className={`grid w-full grid-cols-[3.5rem_minmax(0,1fr)] gap-3 h-auto whitespace-normal py-3 text-left ${marker?.id === m.id ? "text-primary" : ""}`}>
                   <span className="font-mono text-sm text-teal">{fmt(m.start_sec)}</span>
                   <span><b>{m.title}</b><span className="block text-sm text-muted-foreground">{m.summary}</span></span>
                 </Button>
@@ -174,11 +175,11 @@ function Quiz({ questions, onDone, lessonId }: { questions: Q[]; onDone: () => v
       <div className="mt-4 space-y-2">
         {opts.map((o, k) => {
           const state = checked ? (k === feedback?.answer_index ? "border-teal bg-mint" : k === pick ? "border-destructive" : "") : pick === k ? "border-primary bg-mint" : "";
-          return <Button variant="ghost" key={k} disabled={checked} onClick={() => setPick(k)} className={`w-full rounded-xl border p-3 text-left text-sm ${state}`}>{o}</Button>;
+          return <Button variant="ghost" key={k} disabled={checked} onClick={() => setPick(k)} className={`h-auto w-full whitespace-normal justify-start rounded-xl border p-3 text-left text-sm ${state}`}>{o}</Button>;
         })}
       </div>
       {checked && <p className="mt-3 text-sm text-muted-foreground">{pick === feedback?.answer_index ? "Correct. " : "Not quite — added to your revision queue. "}{feedback?.explanation} (see {fmt(q.source_start_sec)})</p>}
-      <div className="mt-4 flex justify-between">
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
         <span className="text-sm text-muted-foreground">Practice one idea at a time</span>
         {checked ? (
           <Button variant="ghost" onClick={() => { setI((i + 1) % questions.length); setPick(null); setChecked(false); setFeedback(null); request.current = crypto.randomUUID(); }} className="rounded-xl bg-primary px-4 py-2 font-bold text-primary-foreground">Next</Button>
