@@ -572,6 +572,10 @@ export type Database = {
         Args: { _lesson: string; _position: number }
         Returns: number
       }
+      record_reading: {
+        Args: { _lesson: string; _start: number }
+        Returns: number
+      }
       replace_lesson_content: {
         Args: {
           _chunks: Json

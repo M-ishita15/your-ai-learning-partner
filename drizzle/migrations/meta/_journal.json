@@ -29,6 +29,13 @@
       "when": 1792458893162,
       "tag": "0003_safe_transcript_replacement",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1792459009060,
+      "tag": "0004_transcript_reading_progress",
+      "breakpoints": true
     }
   ]
 }
