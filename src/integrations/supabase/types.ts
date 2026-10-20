@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_access_state: {
+        Row: {
+          id: string
+          message: string
+          status: number
+          updated_at: string
+        }
+        Insert: {
+          id: string
+          message: string
+          status: number
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          message?: string
+          status?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      ai_requests: {
+        Row: {
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       chat_messages: {
         Row: {
           citations: Json
@@ -61,15 +100,138 @@ export type Database = {
           },
         ]
       }
+      explanation_attempts: {
+        Row: {
+          answer: string
+          created_at: string
+          feedback: Json
+          id: string
+          lesson_id: string
+          topic_marker_id: string
+          user_id: string
+        }
+        Insert: {
+          answer: string
+          created_at?: string
+          feedback: Json
+          id?: string
+          lesson_id: string
+          topic_marker_id: string
+          user_id?: string
+        }
+        Update: {
+          answer?: string
+          created_at?: string
+          feedback?: Json
+          id?: string
+          lesson_id?: string
+          topic_marker_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "explanation_attempts_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "explanation_attempts_topic_marker_id_fkey"
+            columns: ["topic_marker_id"]
+            isOneToOne: false
+            referencedRelation: "topic_markers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      interview_sessions: {
+        Row: {
+          created_at: string
+          id: string
+          lesson_id: string
+          questions: Json
+          scorecard: Json | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          lesson_id: string
+          questions?: Json
+          scorecard?: Json | null
+          status?: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          lesson_id?: string
+          questions?: Json
+          scorecard?: Json | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "interview_sessions_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      interview_turns: {
+        Row: {
+          answer: string
+          evidence: Json
+          id: string
+          question: string
+          score: Json
+          session_id: string
+          turn_index: number
+        }
+        Insert: {
+          answer: string
+          evidence?: Json
+          id?: string
+          question: string
+          score?: Json
+          session_id: string
+          turn_index: number
+        }
+        Update: {
+          answer?: string
+          evidence?: Json
+          id?: string
+          question?: string
+          score?: Json
+          session_id?: string
+          turn_index?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "interview_turns_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "interview_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lessons: {
         Row: {
           created_at: string
           duration_sec: number
           id: string
           note: string
+          owner_id: string | null
           source: string
           summary: string
           title: string
+          transcript_status: string
           youtube_id: string | null
         }
         Insert: {
@@ -77,9 +239,11 @@ export type Database = {
           duration_sec?: number
           id?: string
           note?: string
+          owner_id?: string | null
           source?: string
           summary?: string
           title: string
+          transcript_status?: string
           youtube_id?: string | null
         }
         Update: {
@@ -87,9 +251,11 @@ export type Database = {
           duration_sec?: number
           id?: string
           note?: string
+          owner_id?: string | null
           source?: string
           summary?: string
           title?: string
+          transcript_status?: string
           youtube_id?: string | null
         }
         Relationships: []
@@ -100,6 +266,7 @@ export type Database = {
           created_at: string
           id: string
           question_id: string
+          request_id: string | null
           user_id: string
         }
         Insert: {
@@ -107,6 +274,7 @@ export type Database = {
           created_at?: string
           id?: string
           question_id: string
+          request_id?: string | null
           user_id?: string
         }
         Update: {
@@ -114,6 +282,7 @@ export type Database = {
           created_at?: string
           id?: string
           question_id?: string
+          request_id?: string | null
           user_id?: string
         }
         Relationships: [
@@ -208,6 +377,38 @@ export type Database = {
             columns: ["topic_marker_id"]
             isOneToOne: false
             referencedRelation: "topic_markers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shared_scorecards: {
+        Row: {
+          created_at: string
+          id: string
+          session_id: string
+          token: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          session_id: string
+          token?: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          session_id?: string
+          token?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shared_scorecards_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: true
+            referencedRelation: "interview_sessions"
             referencedColumns: ["id"]
           },
         ]
@@ -308,11 +509,36 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       match_chunks: {
         Args: {
           _lesson: string
@@ -335,9 +561,26 @@ export type Database = {
           title: string
         }[]
       }
+      read_scorecard: { Args: { _token: string }; Returns: Json }
+      replace_lesson_content: {
+        Args: {
+          _chunks: Json
+          _generated: Json
+          _lesson: string
+          _source: string
+          _title: string
+          _youtube: string
+        }
+        Returns: string
+      }
+      reserve_ai_request: { Args: never; Returns: undefined }
+      submit_quiz: {
+        Args: { _pick: number; _question: string; _request: string }
+        Returns: Json
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -464,6 +707,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+    },
   },
 } as const
