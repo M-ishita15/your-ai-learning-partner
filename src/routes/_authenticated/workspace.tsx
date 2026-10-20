@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { savePlayback, saveReading, submitQuiz } from "@/lib/learning.functions";
 import { generatePractice } from "@/lib/practice.functions";
 import { askTutor, whereLater, type TutorReply } from "@/lib/tutor.functions";
+import { useYouTubePlayer } from "@/hooks/use-youtube-player";
 
 export const Route = createFileRoute("/_authenticated/workspace")({
   validateSearch: (s: Record<string, unknown>) => ({ lesson: typeof s["lesson"] === "string" ? s["lesson"] : undefined, t: typeof s["t"] === "number" ? (s["t"] as number) : undefined }),
@@ -27,11 +28,6 @@ export const Route = createFileRoute("/_authenticated/workspace")({
   component: Workspace,
 });
 
-type YTPlayer = { destroy(): void; getPlayerState(): number; getCurrentTime(): number; seekTo(s: number, a: boolean): void; playVideo(): void };
-declare global {
-  interface Window { YT?: { Player: new (el: HTMLElement, o: object) => YTPlayer }; onYouTubeIframeAPIReady?: () => void }
-}
-
 function Workspace() {
   const { t, lesson: selected } = Route.useSearch();
   const lessonId = selected ?? SEED_LESSON_ID;
@@ -40,8 +36,7 @@ function Workspace() {
   const qc = useQueryClient();
   const { data } = useQuery({ queryKey: ["lesson", lessonId], queryFn: () => loadLesson(lessonId) });
   const stats = useQuery({ queryKey: ["stats", lessonId], queryFn: () => loadStats(lessonId) });
-  const host = useRef<HTMLDivElement>(null);
-  const player = useRef<YTPlayer | null>(null);
+  const { host, player, seek: seekPlayer } = useYouTubePlayer(data?.lesson.youtube_id, t ?? stats.data?.maxWatched ?? 0);
   const [now, setNow] = useState(0);
   const [watched, setWatched] = useState(0);
   const watchedRef = useRef(0);
@@ -51,27 +46,6 @@ function Workspace() {
     setWatched(watchedRef.current);
   }, [stats.data?.maxWatched, lessonId]);
 
-  useEffect(() => {
-    const make = () => {
-      const Constructor = window.YT?.Player;
-      const element = host.current;
-      if (!Constructor || !element || !data?.lesson.youtube_id) return;
-      player.current = new Constructor(element, {
-        videoId: data.lesson.youtube_id,
-        playerVars: { rel: 0, start: t ?? watchedRef.current },
-      });
-    };
-    if (window.YT?.Player) make();
-    else {
-      window.onYouTubeIframeAPIReady = make;
-      if (!document.querySelector('script[src="https://www.youtube.com/iframe_api"]')) {
-        const script = document.createElement("script"); script.src = "https://www.youtube.com/iframe_api"; document.body.appendChild(script);
-      }
-    }
-    return () => { player.current?.destroy?.(); player.current = null; if (window.onYouTubeIframeAPIReady === make) delete window.onYouTubeIframeAPIReady; };
-  }, [data?.lesson.youtube_id]);
-
-  useEffect(() => { if (t != null) player.current?.seekTo(t, true); }, [t]);
   useEffect(() => {
     let saving = false;
     let tick = 0;
@@ -90,7 +64,7 @@ function Workspace() {
     return () => clearInterval(id);
   }, [lessonId, savePosition]);
 
-  const seek = (s: number) => { player.current?.seekTo(s, true); player.current?.playVideo(); setNow(s); };
+  const seek = (s: number) => { seekPlayer(s); setNow(s); };
 
   if (!data) return <AppShell crumb="Learning workspace" wide><div className="h-64 animate-pulse rounded-3xl bg-muted" /></AppShell>;
   const { lesson, markers, chunks } = data;
