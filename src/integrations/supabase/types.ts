@@ -297,6 +297,7 @@ export type Database = {
       }
       quiz_questions: {
         Row: {
+          active: boolean
           answer_index: number
           explanation: string
           id: string
@@ -307,6 +308,7 @@ export type Database = {
           topic_marker_id: string | null
         }
         Insert: {
+          active?: boolean
           answer_index: number
           explanation?: string
           id?: string
@@ -317,6 +319,7 @@ export type Database = {
           topic_marker_id?: string | null
         }
         Update: {
+          active?: boolean
           answer_index?: number
           explanation?: string
           id?: string
@@ -415,6 +418,7 @@ export type Database = {
       }
       topic_markers: {
         Row: {
+          active: boolean
           id: string
           lesson_id: string
           start_sec: number
@@ -422,6 +426,7 @@ export type Database = {
           title: string
         }
         Insert: {
+          active?: boolean
           id?: string
           lesson_id: string
           start_sec: number
@@ -429,6 +434,7 @@ export type Database = {
           title: string
         }
         Update: {
+          active?: boolean
           id?: string
           lesson_id?: string
           start_sec?: number
