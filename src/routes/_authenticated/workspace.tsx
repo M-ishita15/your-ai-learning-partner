@@ -36,7 +36,7 @@ function Workspace() {
   const qc = useQueryClient();
   const { data } = useQuery({ queryKey: ["lesson", lessonId], queryFn: () => loadLesson(lessonId) });
   const stats = useQuery({ queryKey: ["stats", lessonId], queryFn: () => loadStats(lessonId) });
-  const { host, player, seek: seekPlayer } = useYouTubePlayer(data?.lesson.youtube_id, t ?? 0);
+  const { host, player, seek: seekPlayer } = useYouTubePlayer(data?.lesson.youtube_id, t ?? stats.data?.maxWatched ?? 0);
   const [now, setNow] = useState(0);
   const [watched, setWatched] = useState(0);
   const watchedRef = useRef(0);
