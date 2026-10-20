@@ -14,3 +14,6 @@
 - Use server-recorded contiguous progress for all tutor, interview, and explanation evidence; seeking alone must not unlock transcript content.
 - Quiz UI reads question-only columns and submits picks through the validating RPC; correctness and revision scheduling are authoritative on the server.
 - Share learning-content schemas and validation in browser-safe modules; validate AI quotes and timestamps before saving feedback.
+
+- Retain old topic and quiz rows as inactive on transcript replacement so learning history remains readable; normal lesson fetches filter active rows.
+- Verify session ownership through user-scoped reads before privileged interview/result writes; direct client writes cannot forge completed scores.

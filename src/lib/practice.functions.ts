@@ -18,7 +18,8 @@ export const startInterview = createServerFn({ method: 'POST' }).middleware([req
     const generated = await structured(questionSchema, PROMPTS.interviewer,
       `Ask exactly three distinct questions. Assign a topic_id from these topics: ${JSON.stringify(content.markers)}. Use only this watched transcript: ${JSON.stringify(content.chunks)}`);
     if (generated.questions.length !== 3 || generated.questions.some(q => !q.question.trim() || !content.markers.some(m => m.id === q.topic_id))) throw new Error('The interview questions could not be verified. Please try again.');
-    const { data: session, error } = await context.supabase.from('interview_sessions').insert({ lesson_id: data.lessonId, questions: generated.questions }).select('*').single();
+    const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
+    const { data: session, error } = await supabaseAdmin.from('interview_sessions').insert({ user_id: context.userId, lesson_id: data.lessonId, questions: generated.questions }).select('*').single();
     if (error) throw new Error(error.message);
     return session;
   });
@@ -38,7 +39,8 @@ export const answerInterview = createServerFn({ method: 'POST' }).middleware([re
     const question = questions[data.index];
     if (!question) throw new Error('Question not found.');
     if (!saved.some(t => t.turn_index === data.index)) {
-      const { error: insertError } = await db.from('interview_turns').insert({ session_id: session.id, turn_index: data.index, question: question.question, answer: data.answer });
+      const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
+      const { error: insertError } = await supabaseAdmin.from('interview_turns').upsert({ session_id: session.id, turn_index: data.index, question: question.question, answer: data.answer }, { onConflict: 'session_id,turn_index', ignoreDuplicates: true });
       if (insertError) throw new Error(insertError.message);
     }
     return session;
@@ -60,7 +62,8 @@ export const scoreInterview = createServerFn({ method: 'POST' }).middleware([req
     const card = validateScorecard(await structured(ScorecardSchema, PROMPTS.scorer,
       `Return exactly four scores with labels Technical knowledge, Communication, Problem solving, Answer structure, integer values 1–5. Each evidence must be a nonempty verbatim quote from one learner answer. Choose weakest_topic_id from the lesson topics and revisit_sec at its start. Topics: ${JSON.stringify(content.markers)}. Transcript: ${JSON.stringify(content.chunks)}. Learner answers: ${JSON.stringify(turns.map(t => ({ question: t.question, answer: t.answer })))}`), turns.map(t => t.answer), content.markers);
     if (card.scores.some(s => s.value <= 2)) await reviseTopic(db, context.userId, card.weakest_topic_id, false);
-    const { data: complete, error: saveError } = await db.from('interview_sessions').update({ status: 'complete', scorecard: card }).eq('id', session.id).select('*').single();
+    const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
+    const { data: complete, error: saveError } = await supabaseAdmin.from('interview_sessions').update({ status: 'complete', scorecard: card }).eq('id', session.id).select('*').single();
     if (saveError) throw new Error(saveError.message);
     return complete;
   });
@@ -106,7 +109,8 @@ export const explainBack = createServerFn({ method: 'POST' }).middleware([requir
     const feedback = await structured(feedbackSchema, PROMPTS.explain,
       `Topic: ${topic.title}. Transcript: ${JSON.stringify(chunks)}. Learner answer: ${data.answer}. Give an integer score 1–5, a verbatim evidence quote from the learner, and transcript_evidence quoted exactly from one transcript chunk.`);
     if (!Number.isInteger(feedback.score) || feedback.score < 1 || feedback.score > 5 || !feedback.evidence.trim() || !data.answer.includes(feedback.evidence) || !feedback.transcript_evidence.trim() || !chunks.some(c => c.text.includes(feedback.transcript_evidence))) throw new Error('Feedback evidence could not be verified. Please try again.');
-    const { error } = await context.supabase.from('explanation_attempts').insert({ lesson_id: data.lessonId, topic_marker_id: data.topicId, answer: data.answer, feedback });
+    const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
+    const { error } = await supabaseAdmin.from('explanation_attempts').insert({ user_id: context.userId, lesson_id: data.lessonId, topic_marker_id: data.topicId, answer: data.answer, feedback });
     if (error) throw new Error(error.message);
     await reviseTopic(context.supabase, context.userId, data.topicId, feedback.score >= 3);
     return feedback;

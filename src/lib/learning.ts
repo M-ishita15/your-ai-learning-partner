@@ -4,9 +4,9 @@ import { SEED_LESSON_ID } from "./time";
 export async function loadLesson(lessonId = SEED_LESSON_ID) {
   const [l, m, c, q] = await Promise.all([
     supabase.from("lessons").select("*").eq("id", lessonId).single(),
-    supabase.from("topic_markers").select("*").eq("lesson_id", lessonId).order("start_sec"),
+    supabase.from("topic_markers").select("*").eq("lesson_id", lessonId).eq("active",true).order("start_sec"),
     supabase.from("transcript_chunks").select("id,start_sec,end_sec,text").eq("lesson_id", lessonId).order("start_sec"),
-    supabase.from("quiz_questions").select("id,lesson_id,topic_marker_id,question,options,source_start_sec").eq("lesson_id", lessonId).order("source_start_sec"),
+    supabase.from("quiz_questions").select("id,lesson_id,topic_marker_id,question,options,source_start_sec").eq("lesson_id", lessonId).eq("active",true).order("source_start_sec"),
   ]);
   for (const result of [l, m, c, q]) if (result.error) throw new Error(result.error.message);
   if (!l.data) throw new Error("Lesson not found.");

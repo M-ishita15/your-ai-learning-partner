@@ -6,7 +6,7 @@ export async function watchedContent(db: SupabaseClient<Database>, lessonId: str
   const [progress, lesson, markers, chunks] = await Promise.all([
     db.from('user_progress').select('max_watched_sec').eq('lesson_id', lessonId).maybeSingle(),
     db.from('lessons').select('*').eq('id', lessonId).single(),
-    db.from('topic_markers').select('*').eq('lesson_id', lessonId).order('start_sec'),
+    db.from('topic_markers').select('*').eq('lesson_id', lessonId).eq('active',true).order('start_sec'),
     db.from('transcript_chunks').select('id,start_sec,end_sec,text').eq('lesson_id', lessonId).order('start_sec'),
   ]);
   for (const result of [progress, lesson, markers, chunks]) if (result.error) throw new Error(result.error.message);

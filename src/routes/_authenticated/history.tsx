@@ -6,7 +6,7 @@ import { ScorecardSchema } from "@/lib/lesson-content";
 import { loadStats } from "@/lib/learning";
 
 export const Route = createFileRoute("/_authenticated/history")({
-  head: () => ({ meta: [{ title: "Learning history · Coherence" }, { name: "description", content: "Your quiz attempts and score trend over time." }, { property: "og:title", content: "Learning history · Coherence" }, { property: "og:description", content: "Your quiz attempts and score trend over time." }] }),
+  head: () => ({ meta: [{ title: "Learning history · Coherence" }, { name: "description", content: "Your quiz attempts and score trend over time." }, { property: "og:title", content: "Learning history · Coherence" }, { property: "og:description", content: "Your quiz attempts and score trend over time." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }] }),
   component: History,
 });
 
