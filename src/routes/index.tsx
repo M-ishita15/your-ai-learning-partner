@@ -46,7 +46,7 @@ function Home() {
             <Link to={user ? "/workspace" : "/auth"} search={{ t: undefined } as never} className="inline-flex items-center gap-3 rounded-2xl bg-primary px-6 py-4 font-bold text-primary-foreground shadow-lg">
               Continue learning <ArrowRight className="h-5 w-5" />
             </Link>
-            <Link to="/interview" className="inline-flex items-center gap-3 rounded-2xl border bg-card px-6 py-4 font-bold">
+            <Link to="/interview" search={{ lesson: undefined, session: undefined }} className="inline-flex items-center gap-3 rounded-2xl border bg-card px-6 py-4 font-bold">
               <Headphones className="h-5 w-5" /> Start mock interview
             </Link>
             <Link to="/revise" className="rounded-2xl border bg-mint px-6 py-4 font-bold text-secondary-foreground">Review concepts</Link>
@@ -73,7 +73,7 @@ function Home() {
         <section>
           <div className="mb-3 flex items-center justify-between">
             <p className="eyebrow">Pick up where curiosity left off</p>
-            <Link to="/workspace" search={{ t: undefined }} className="text-sm font-bold text-secondary-foreground">Open workspace →</Link>
+            <Link to="/workspace" search={{ t: undefined, lesson: undefined }} className="text-sm font-bold text-secondary-foreground">Open workspace →</Link>
           </div>
           <div className="card-soft p-6">
             <p className="eyebrow">Lesson 01 · Physics</p>

@@ -32,7 +32,7 @@ function History() {
           <p className="eyebrow">Practice that adds up</p>
           <h2 className="mt-1 text-xl font-extrabold">Quiz attempts</h2>
           {isLoading ? <div className="mt-4 h-24 animate-pulse rounded bg-muted" /> : attempts.length === 0 ? (
-            <div className="mt-4"><p className="font-bold">Your first practice round is one step away.</p><Link to="/workspace" search={{ t: undefined }} className="mt-3 inline-block rounded-xl bg-primary px-4 py-2 font-bold text-primary-foreground">Start practice →</Link></div>
+            <div className="mt-4"><p className="font-bold">Your first practice round is one step away.</p><Link to="/workspace" search={{ t: undefined, lesson: undefined }} className="mt-3 inline-block rounded-xl bg-primary px-4 py-2 font-bold text-primary-foreground">Start practice →</Link></div>
           ) : (
             <p className="mt-3 text-3xl font-extrabold">{attempts.length} answers · {data?.score}% correct</p>
           )}

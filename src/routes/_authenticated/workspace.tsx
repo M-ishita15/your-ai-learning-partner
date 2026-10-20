@@ -66,7 +66,7 @@ function Workspace() {
         const script = document.createElement("script"); script.src = "https://www.youtube.com/iframe_api"; document.body.appendChild(script);
       }
     }
-    return () => { player.current?.destroy?.(); player.current = null; if (window.onYouTubeIframeAPIReady === make) window.onYouTubeIframeAPIReady = undefined; };
+    return () => { player.current?.destroy?.(); player.current = null; if (window.onYouTubeIframeAPIReady === make) delete window.onYouTubeIframeAPIReady; };
   }, [data?.lesson.youtube_id]);
 
   useEffect(() => { if (t != null) player.current?.seekTo(t, true); }, [t]);
@@ -190,7 +190,7 @@ function Quiz({ questions, onDone, lessonId }: { questions: Q[]; onDone: () => v
   );
 }
 
-type Msg = { role: "user"; text: string } | { role: "assistant"; reply: TutorReply; question: string; later?: { start_sec: number; title: string } | null | "loading" };
+type Msg = { role: "user"; text: string } | { role: "assistant"; reply: TutorReply; question: string; later?: { start_sec: number; title: string } | null | "loading" | undefined };
 
 function Tutor({ watched, onSeek, lessonId }: { lessonId: string; watched: number; onSeek: (s: number) => void }) {
   const ask = useServerFn(askTutor);
