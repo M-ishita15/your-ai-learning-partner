@@ -562,6 +562,10 @@ export type Database = {
         }[]
       }
       read_scorecard: { Args: { _token: string }; Returns: Json }
+      record_playback: {
+        Args: { _lesson: string; _position: number }
+        Returns: number
+      }
       replace_lesson_content: {
         Args: {
           _chunks: Json
