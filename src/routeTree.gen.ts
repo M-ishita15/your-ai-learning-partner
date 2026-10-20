@@ -16,6 +16,7 @@ import { Route as AuthenticatedHistoryRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedInterviewRouteImport } from './routes/_authenticated/interview'
 import { Route as AuthenticatedReviseRouteImport } from './routes/_authenticated/revise'
 import { Route as AuthenticatedWorkspaceRouteImport } from './routes/_authenticated/workspace'
+import { Route as ScorecardTokenRouteImport } from './routes/scorecard/$token'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -51,6 +52,11 @@ const AuthenticatedWorkspaceRoute = AuthenticatedWorkspaceRouteImport.update({
   path: '/workspace',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const ScorecardTokenRoute = ScorecardTokenRouteImport.update({
+  id: '/scorecard/$token',
+  path: '/scorecard/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -59,6 +65,7 @@ export interface FileRoutesByFullPath {
   '/interview': typeof AuthenticatedInterviewRoute
   '/revise': typeof AuthenticatedReviseRoute
   '/workspace': typeof AuthenticatedWorkspaceRoute
+  '/scorecard/$token': typeof ScorecardTokenRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -67,6 +74,7 @@ export interface FileRoutesByTo {
   '/interview': typeof AuthenticatedInterviewRoute
   '/revise': typeof AuthenticatedReviseRoute
   '/workspace': typeof AuthenticatedWorkspaceRoute
+  '/scorecard/$token': typeof ScorecardTokenRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -77,13 +85,27 @@ export interface FileRoutesById {
   '/_authenticated/interview': typeof AuthenticatedInterviewRoute
   '/_authenticated/revise': typeof AuthenticatedReviseRoute
   '/_authenticated/workspace': typeof AuthenticatedWorkspaceRoute
+  '/scorecard/$token': typeof ScorecardTokenRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/auth' | '/history' | '/interview' | '/revise' | '/workspace'
+    | '/'
+    | '/auth'
+    | '/history'
+    | '/interview'
+    | '/revise'
+    | '/workspace'
+    | '/scorecard/$token'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/history' | '/interview' | '/revise' | '/workspace'
+  to:
+    | '/'
+    | '/auth'
+    | '/history'
+    | '/interview'
+    | '/revise'
+    | '/workspace'
+    | '/scorecard/$token'
   id:
     | '__root__'
     | '/'
@@ -93,12 +115,14 @@ export interface FileRouteTypes {
     | '/_authenticated/interview'
     | '/_authenticated/revise'
     | '/_authenticated/workspace'
+    | '/scorecard/$token'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  ScorecardTokenRoute: typeof ScorecardTokenRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -152,6 +176,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedWorkspaceRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/scorecard/$token': {
+      id: '/scorecard/$token'
+      path: '/scorecard/$token'
+      fullPath: '/scorecard/$token'
+      preLoaderRoute: typeof ScorecardTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -176,6 +207,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  ScorecardTokenRoute: ScorecardTokenRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

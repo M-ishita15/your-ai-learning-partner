@@ -4,6 +4,7 @@ import { ArrowRight, BookOpen, Flame, Headphones, ListChecks, Target } from "luc
 import { AppShell, Atom } from "@/components/AppShell";
 import { useAuth } from "@/hooks/useAuth";
 import { loadLesson, loadStats } from "@/lib/learning";
+import { LessonImport } from "@/components/LessonImport";
 import { fmt } from "@/lib/time";
 
 export const Route = createFileRoute("/")({
@@ -13,6 +14,7 @@ export const Route = createFileRoute("/")({
       { name: "description", content: "A timestamp-aware AI tutor that answers only from what you've watched, then runs a mock interview." },
       { property: "og:title", content: "Coherence — Your AI path to instant clarity" },
       { property: "og:description", content: "Learn, ask better questions, practice, and feel ready to explain it." },
+      { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: Home,
@@ -27,7 +29,7 @@ function Home() {
   const s = statsQ.data;
   const pct = lesson && s ? Math.min(100, Math.round((s.maxWatched / lesson.duration_sec) * 100)) : 0;
   const next = s?.due[0] as { topic_markers: { title: string; start_sec: number } | null } | undefined;
-  const mastered = markers.length - (s?.needsWork ?? 0);
+  const mastered = s?.mastered ?? 0;
 
   return (
     <AppShell crumb="Overview" wide>
@@ -45,7 +47,7 @@ function Home() {
             <Link to={user ? "/workspace" : "/auth"} search={{ t: undefined } as never} className="inline-flex items-center gap-3 rounded-2xl bg-primary px-6 py-4 font-bold text-primary-foreground shadow-lg">
               Continue learning <ArrowRight className="h-5 w-5" />
             </Link>
-            <Link to="/interview" className="inline-flex items-center gap-3 rounded-2xl border bg-card px-6 py-4 font-bold">
+            <Link to="/interview" search={{ lesson: undefined, session: undefined }} className="inline-flex items-center gap-3 rounded-2xl border bg-card px-6 py-4 font-bold">
               <Headphones className="h-5 w-5" /> Start mock interview
             </Link>
             <Link to="/revise" className="rounded-2xl border bg-mint px-6 py-4 font-bold text-secondary-foreground">Review concepts</Link>
@@ -67,11 +69,12 @@ function Home() {
         )}
       </div>
 
+      <LessonImport />
       <div className="mt-10 grid gap-6 lg:grid-cols-2">
         <section>
           <div className="mb-3 flex items-center justify-between">
             <p className="eyebrow">Pick up where curiosity left off</p>
-            <Link to="/workspace" search={{ t: undefined }} className="text-sm font-bold text-secondary-foreground">Open workspace →</Link>
+            <Link to="/workspace" search={{ t: undefined, lesson: undefined }} className="text-sm font-bold text-secondary-foreground">Open workspace →</Link>
           </div>
           <div className="card-soft p-6">
             <p className="eyebrow">Lesson 01 · Physics</p>
@@ -96,11 +99,12 @@ function Home() {
           <div>
             <div className="mb-3 flex items-center justify-between"><h3 className="font-extrabold">Recently active</h3><Link to="/history" className="text-sm font-bold text-secondary-foreground">History →</Link></div>
             <div className="card-soft p-5 text-sm text-muted-foreground">
-              {s?.attempts.length ? `${s.attempts.length} practice answers · last on ${new Date(s.attempts[0]!.created_at).toLocaleDateString()}` : "Your practice and interview sessions will appear here as you work."}
+              {s?.attempts.length ? `${s.attempts.length} practice answers · last on ${new Date(s.attempts[0]?.created_at ?? Date.now()).toLocaleDateString()}` : "Your practice and interview sessions will appear here as you work."}
             </div>
           </div>
         </section>
       </div>
+      {user && s?.interviews[0] && <p className="mt-5 text-sm text-muted-foreground">Last interview · {new Date(s.interviews[0].created_at).toLocaleDateString()} · {s.interviews[0].status}</p>}
     </AppShell>
   );
 }

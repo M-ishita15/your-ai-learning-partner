@@ -1,10 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { AppShell } from "@/components/AppShell";
+import { Button } from "@/components/ui/button";
+import { ScorecardSchema } from "@/lib/lesson-content";
 import { loadStats } from "@/lib/learning";
 
 export const Route = createFileRoute("/_authenticated/history")({
-  head: () => ({ meta: [{ title: "Learning history · Coherence" }, { name: "description", content: "Your quiz attempts and score trend over time." }, { property: "og:title", content: "Learning history · Coherence" }, { property: "og:description", content: "Your quiz attempts and score trend over time." }] }),
+  head: () => ({ meta: [{ title: "Learning history · Coherence" }, { name: "description", content: "Your quiz attempts and score trend over time." }, { property: "og:title", content: "Learning history · Coherence" }, { property: "og:description", content: "Your quiz attempts and score trend over time." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }] }),
   component: History,
 });
 
@@ -30,7 +32,7 @@ function History() {
           <p className="eyebrow">Practice that adds up</p>
           <h2 className="mt-1 text-xl font-extrabold">Quiz attempts</h2>
           {isLoading ? <div className="mt-4 h-24 animate-pulse rounded bg-muted" /> : attempts.length === 0 ? (
-            <div className="mt-4"><p className="font-bold">Your first practice round is one step away.</p><Link to="/workspace" search={{ t: undefined }} className="mt-3 inline-block rounded-xl bg-primary px-4 py-2 font-bold text-primary-foreground">Start practice →</Link></div>
+            <div className="mt-4"><p className="font-bold">Your first practice round is one step away.</p><Link to="/workspace" search={{ t: undefined, lesson: undefined }} className="mt-3 inline-block rounded-xl bg-primary px-4 py-2 font-bold text-primary-foreground">Start practice →</Link></div>
           ) : (
             <p className="mt-3 text-3xl font-extrabold">{attempts.length} answers · {data?.score}% correct</p>
           )}
@@ -49,6 +51,14 @@ function History() {
           )}
         </section>
       </div>
+      <section className="mt-8 border-t pt-6"><h2 className="text-xl font-bold">Saved interviews</h2>
+        {data?.interviews.length ? <div className="mt-4 divide-y">{data.interviews.map(session => {
+          const card = ScorecardSchema.safeParse(session.scorecard);
+          const average = card.success ? (card.data.scores.reduce((sum, score) => sum + score.value, 0) / 4).toFixed(1) : null;
+          return <div key={session.id} className="flex flex-wrap items-center justify-between gap-3 py-4"><div><b>{average ? `${average}/5 · Interview complete` : 'Interview in progress'}</b><p className="text-sm text-muted-foreground">{new Date(session.created_at).toLocaleString()}</p></div><Button asChild variant="secondary"><Link to="/interview" search={{ lesson: session.lesson_id, session: session.id }}>{average ? 'View scorecard' : 'Continue'} →</Link></Button></div>;
+        })}</div> : <p className="mt-3 text-sm text-muted-foreground">No interviews saved yet.</p>}
+      </section>
+      <section className="mt-8 border-t pt-6"><h2 className="text-xl font-bold">Recent quiz answers</h2><div className="mt-3 divide-y">{attempts.slice(0, 30).map((a, i) => <div key={`${a.created_at}-${i}`} className="flex justify-between gap-3 py-3 text-sm"><span>{a.correct ? 'Correct' : 'Needs revision'}</span><time className="text-muted-foreground">{new Date(a.created_at).toLocaleString()}</time></div>)}</div></section>
     </AppShell>
   );
 }
