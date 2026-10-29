@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
@@ -24,6 +24,14 @@ function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
+  useEffect(() => {
+    const hash = new URLSearchParams(window.location.hash.slice(1));
+    const err = hash.get("error_description") ?? new URLSearchParams(window.location.search).get("error_description");
+    if (err) toast.error(err);
+    supabase.auth.getUser().then(({ data }) => { if (data.user) navigate({ to: "/" }); });
+    const { data } = supabase.auth.onAuthStateChange((_e, s) => { if (s?.user) navigate({ to: "/" }); });
+    return () => data.subscription.unsubscribe();
+  }, [navigate]);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -39,8 +47,10 @@ function AuthPage() {
   }
 
   async function oauth(p: "google" | "lovable") {
-    const r = await lovable.auth.signInWithOAuth(p, { redirect_uri: window.location.origin });
-    if (r.error) { toast.error(String(r.error.message ?? r.error)); return; }
+    setBusy(true);
+    const r = await lovable.auth.signInWithOAuth(p, { redirect_uri: window.location.origin, ...(p === "google" ? { extraParams: { prompt: "select_account" } } : {}) }).catch((e: unknown) => ({ error: e instanceof Error ? e : new Error(String(e)), redirected: false }));
+    setBusy(false);
+    if (r.error) { toast.error(r.error.message || "Sign-in did not complete. Please try again."); return; }
     if (r.redirected) return;
     navigate({ to: "/" });
   }
@@ -59,8 +69,8 @@ function AuthPage() {
           </button>
         </form>
         <div className="mt-3 grid gap-2">
-          <button onClick={() => oauth("google")} className="w-full rounded-xl border bg-card py-3 font-semibold">Continue with Google</button>
-          <button onClick={() => oauth("lovable")} className="w-full rounded-xl border bg-card py-3 font-semibold">Continue with Lovable</button>
+          <button disabled={busy} onClick={() => oauth("google")} className="w-full rounded-xl border bg-card py-3 font-semibold">Continue with Google</button>
+          <button disabled={busy} onClick={() => oauth("lovable")} className="w-full rounded-xl border bg-card py-3 font-semibold">Continue with Lovable</button>
         </div>
         <button onClick={() => setMode(mode === "in" ? "up" : "in")} className="mt-4 text-sm font-semibold text-secondary-foreground">
           {mode === "in" ? "New here? Create an account" : "Already have an account? Sign in"}

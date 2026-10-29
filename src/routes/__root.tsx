@@ -12,6 +12,7 @@ import { useEffect, type ReactNode } from "react";
 
 import { supabase } from "@/integrations/supabase/client";
 import { Toaster } from "@/components/ui/sonner";
+import { Mascot } from "@/components/Mascot";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
@@ -138,6 +139,7 @@ function RootComponent() {
       <Toaster /> breaks all child routes. */}
       <Outlet />
       <Toaster />
+      <Mascot />
     </QueryClientProvider>
   );
 }

@@ -2,7 +2,8 @@ import { createFileRoute, Link } from '@tanstack/react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useServerFn } from '@tanstack/react-start';
 import { useState } from 'react';
-import { Mic, Square, RotateCw } from 'lucide-react';
+import { Mic, Square, RotateCw, Layers } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import { AppShell } from '@/components/AppShell';
 import { Button } from '@/components/ui/button';
@@ -20,7 +21,7 @@ function Revise() {
   const stats = useQuery({ queryKey: ['stats'], queryFn: () => loadStats() });
   const [lessonId, setLessonId] = useState(SEED_LESSON_ID), [topicId, setTopicId] = useState(''), [answer, setAnswer] = useState('');
   const [busy, setBusy] = useState(false), [feedback, setFeedback] = useState<Awaited<ReturnType<typeof explainBack>> | null>(null);
-  const [card, setCard] = useState(0), [reveal, setReveal] = useState(false);
+  const [card, setCard] = useState(0), [reveal, setReveal] = useState(false), [open, setOpen] = useState(false);
   const lessons = useQuery({ queryKey: ['lessons'], queryFn: async () => { const { data, error } = await supabase.from('lessons').select('id,title'); if (error) throw new Error(error.message); return data ?? []; } });
   const lesson = useQuery({ queryKey: ['lesson', lessonId], queryFn: () => loadLesson(lessonId) });
   const progress = useQuery({ queryKey: ['stats', lessonId], queryFn: () => loadStats(lessonId) });
@@ -43,7 +44,11 @@ function Revise() {
       </form>}
       {feedback && <div className="mt-5 border-l-2 border-teal pl-4"><b>{feedback.score}/5</b><p className="mt-2">{feedback.feedback}</p><blockquote className="mt-3 text-sm">Your words: “{feedback.evidence}”</blockquote><blockquote className="mt-2 text-sm text-muted-foreground">Transcript: “{feedback.transcript_evidence}”</blockquote><p className="mt-3 text-sm">{feedback.tip}</p></div>}
       </section>
-      <section><p className="eyebrow">Flashcard moment</p><h2 className="mt-2 text-xl font-bold">Bring the idea to mind.</h2>{flash ? <article className="card-soft mt-4 p-5"><h3 className="text-lg font-bold">How would you explain {flash.title.toLowerCase()}?</h3>{reveal && <p className="mt-3 text-sm text-muted-foreground">{flash.summary}</p>}<div className="mt-5 flex flex-wrap gap-3"><Button variant="secondary" onClick={() => setReveal(!reveal)}>{reveal ? 'Hide answer' : 'Reveal answer'}</Button><Button variant="outline" onClick={() => { setCard(c => c + 1); setReveal(false); }}><RotateCw />Next card</Button></div><Button asChild className="mt-4" variant="link"><Link to="/workspace" search={{ lesson: lessonId, t: flash.start_sec }}>Watch at {fmt(flash.start_sec)} →</Link></Button></article> : <p className="mt-4 text-muted-foreground">No watched topics yet.</p>}</section>
+      <section><p className="eyebrow">Flashcard moment</p><h2 className="mt-2 text-xl font-bold">Bring the idea to mind.</h2>{flash ? <><p className="mt-3 text-sm text-muted-foreground">{topics.length} card{topics.length === 1 ? '' : 's'} from what you've watched.</p><Button className="mt-4" onClick={() => { setReveal(false); setOpen(true); }}><Layers />Open flashcards</Button></> : <p className="mt-4 text-muted-foreground">No watched topics yet.</p>}</section>
+      <Dialog open={open && !!flash} onOpenChange={setOpen}><DialogContent className="max-w-md"><DialogHeader><DialogTitle>Flashcard {(card % Math.max(1, topics.length)) + 1} of {topics.length}</DialogTitle><DialogDescription>Tap the card to flip it.</DialogDescription></DialogHeader>
+        {flash && <button type="button" aria-label={reveal ? 'Show question' : 'Show answer'} onClick={() => setReveal(r => !r)} className="flip-card block h-64 w-full text-left"><div className={`flip-inner h-full ${reveal ? 'is-flipped' : ''}`}><div className="flip-face hero-panel grid place-items-center p-6 text-center"><div><p className="eyebrow">Question</p><h3 className="mt-3 text-xl font-bold">How would you explain {flash.title.toLowerCase()}?</h3></div></div><div className="flip-face flip-back card-soft overflow-y-auto p-6"><p className="eyebrow">Answer</p><p className="mt-3">{flash.summary}</p></div></div></button>}
+        <div className="flex flex-wrap justify-between gap-3">{flash && <Button asChild variant="link" className="px-0"><Link to="/workspace" search={{ lesson: lessonId, t: flash.start_sec }}>Watch at {fmt(flash.start_sec)} →</Link></Button>}<Button variant="outline" onClick={() => { setReveal(false); setTimeout(() => setCard(c => c + 1), reveal ? 300 : 0); }}><RotateCw />Next card</Button></div>
+      </DialogContent></Dialog>
     </div>
   </AppShell>;
 }
