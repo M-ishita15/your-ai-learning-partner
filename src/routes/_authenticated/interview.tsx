@@ -44,7 +44,7 @@ function Interview() {
   const index = turns.data?.length ?? 0;
   const card = ScorecardSchema.safeParse(session.data?.scorecard);
   async function run(action: () => Promise<void>) { setBusy(true); try { await action(); } catch (e) { toast.error(e instanceof Error ? e.message : 'Please try again.'); } finally { setBusy(false); } }
-  async function finish() { if (!sessionId) return; await score({ data: { sessionId } }); await qc.invalidateQueries({ queryKey: ['interview', sessionId] }); await qc.invalidateQueries({ queryKey: ['stats'] }); }
+  async function finish() { if (!sessionId) return; await score({ data: { sessionId } }); await qc.invalidateQueries({ queryKey: ['interview', sessionId] }); await qc.invalidateQueries({ queryKey: ['stats'] }); mascotSay('interview'); }
   return <AppShell crumb="Mock interview" wide>
     <p className="eyebrow">Make the idea your own</p><h1 className="mt-2 text-4xl font-extrabold">Mock interview</h1>
     <p className="mt-3 text-muted-foreground">{lesson.data?.lesson.title} · Watched up to {fmt(stats.data?.maxWatched ?? 0)}</p>

@@ -6,6 +6,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { loadLesson, loadStats } from "@/lib/learning";
 import { LessonImport } from "@/components/LessonImport";
 import { fmt } from "@/lib/time";
+import { useEffect } from "react";
+import { mascotRevisionDue } from "@/components/Mascot";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -30,6 +32,8 @@ function Home() {
   const pct = lesson && s ? Math.min(100, Math.round((s.maxWatched / lesson.duration_sec) * 100)) : 0;
   const next = s?.due[0] as { topic_markers: { title: string; start_sec: number } | null } | undefined;
   const mastered = s?.mastered ?? 0;
+  const dueCount = s?.due.length ?? 0;
+  useEffect(() => { if (dueCount > 0) setTimeout(() => mascotRevisionDue(dueCount), 10000); }, [dueCount]);
 
   return (
     <AppShell crumb="Overview" wide>

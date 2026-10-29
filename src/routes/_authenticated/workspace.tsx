@@ -10,6 +10,7 @@ import { loadLesson, loadStats } from "@/lib/learning";
 import { fmt, SEED_LESSON_ID } from "@/lib/time";
 import { Button } from "@/components/ui/button";
 import { savePlayback, saveReading, submitQuiz } from "@/lib/learning.functions";
+import { mascotSay } from "@/components/Mascot";
 import { generatePractice } from "@/lib/practice.functions";
 import { askTutor, whereLater, type TutorReply } from "@/lib/tutor.functions";
 import { useYouTubePlayer } from "@/hooks/use-youtube-player";
@@ -138,7 +139,7 @@ function Quiz({ questions, onDone, lessonId }: { questions: Q[]; onDone: () => v
   async function check() {
     if (pick == null || !q || busy) return;
     setBusy(true);
-    try { const result = await submit({ data: { questionId: q.id, pick, requestId: request.current } }); setFeedback(result); setChecked(true); onDone(); }
+    try { const result = await submit({ data: { questionId: q.id, pick, requestId: request.current } }); setFeedback(result); setChecked(true); mascotSay(result.correct ? "quiz-right" : "quiz-wrong"); onDone(); }
     catch (error) { toast.error(error instanceof Error ? error.message : "Could not save your answer."); }
     finally { setBusy(false); }
   }
