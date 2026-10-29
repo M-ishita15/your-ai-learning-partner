@@ -8,3 +8,5 @@
 - [x] Test learning flows on phone and computer; corrected phone overflow and interview generation
 - [ ] Replace the sample MIT transcript with authentic captions — waiting for the user-supplied transcript and an authorized admin
 - [ ] Verify actual microphone transcription — requires a microphone-enabled browser; typed answers are tested
+- [x] Flip-card flashcard pop-up, Qubit mascot at key moments, Google sign-in hardening
+- [ ] Add "points 2 and 7" — waiting for the user to confirm which 8-point list they mean
