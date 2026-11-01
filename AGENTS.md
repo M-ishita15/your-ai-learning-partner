@@ -10,6 +10,7 @@
 <!-- LOVABLE:END -->
 
 ## Learning architecture
+- Keep Home's desktop overview top-aligned with compact stats and lesson topics; prevent grid stretching from creating empty panels.
 - Keep AI prompts and gateway calls in server-only helpers, exposed through authenticated server functions; public scorecards use a token-scoped read-only SQL function so private activity never enters the share response.
 - Use server-recorded contiguous progress for all tutor, interview, and explanation evidence; seeking alone must not unlock transcript content.
 - Quiz UI reads question-only columns and submits picks through the validating RPC; correctness and revision scheduling are authoritative on the server.
