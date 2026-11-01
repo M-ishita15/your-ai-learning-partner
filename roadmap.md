@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Make the computer overview denser with compact stats and visible lesson topics; preserve phone layout
 - [x] Phase 1: design, sign-in, lesson data, workspace + spoiler-proof tutor, Home stats
 - [x] Layout works on both phone and computer
 - [x] Revise (due queue, flashcards) and History (attempts, trend)
