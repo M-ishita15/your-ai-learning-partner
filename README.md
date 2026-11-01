@@ -133,7 +133,7 @@ git clone https://github.com/M-ishita15/your-ai-learning-partner
 Navigate to the project directory:
 
 ```bash
-cd your-ai-learning-partner
+https://your-ai-learning-partner.lovable.app/
 ```
 
 Install dependencies:
