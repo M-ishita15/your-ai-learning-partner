@@ -20,3 +20,4 @@
 - Verify session ownership through user-scoped reads before privileged interview/result writes; direct client writes cannot forge completed scores.
 - Transcript-only lessons advance through an ordered reading RPC; this is separate from video playback so imported text remains usable without pretending it was watched.
 - Own the YouTube iframe lifecycle in a browser-safe hook, queue timestamp requests until onReady, and mount inside a stable React host to avoid loading races and broken remounts.
+- Keep personal lesson notes owner-scoped; AI summary drafts use fully completed server-recorded transcript segments and verified exact quotes before the learner saves them.

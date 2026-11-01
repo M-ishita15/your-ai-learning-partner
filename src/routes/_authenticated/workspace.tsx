@@ -14,6 +14,7 @@ import { mascotSay } from "@/components/Mascot";
 import { generatePractice } from "@/lib/practice.functions";
 import { askTutor, whereLater, type TutorReply } from "@/lib/tutor.functions";
 import { useYouTubePlayer } from "@/hooks/use-youtube-player";
+import { LessonNotes } from "@/components/LessonNotes";
 
 export const Route = createFileRoute("/_authenticated/workspace")({
   validateSearch: (s: Record<string, unknown>) => ({ lesson: typeof s["lesson"] === "string" ? s["lesson"] : undefined, t: typeof s["t"] === "number" ? (s["t"] as number) : undefined }),
@@ -117,7 +118,10 @@ function Workspace() {
           <Quiz lessonId={lessonId} questions={data.questions} onDone={() => qc.invalidateQueries({ queryKey: ["stats"] })} />
         </div>
 
-        <Tutor key={lessonId} lessonId={lessonId} watched={watched} onSeek={seek} />
+        <div className="min-w-0 space-y-6">
+          <Tutor key={lessonId} lessonId={lessonId} watched={watched} onSeek={seek} />
+          <LessonNotes key={`notes-${lessonId}`} lessonId={lessonId} now={now} watched={watched} onSeek={seek} />
+        </div>
       </div>
     </AppShell>
   );
