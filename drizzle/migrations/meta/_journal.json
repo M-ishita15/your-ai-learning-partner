@@ -36,6 +36,13 @@
       "when": 1792459009060,
       "tag": "0004_transcript_reading_progress",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1793518337180,
+      "tag": "0005_private_lesson_notes",
+      "breakpoints": true
     }
   ]
 }
