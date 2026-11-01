@@ -1,4 +1,5 @@
 # Roadmap
+- [ ] Add private lesson notes, timestamp links, and watched-only AI summaries; test saved notes
 - [x] Make the computer overview denser with compact stats and visible lesson topics; preserve phone layout
 - [x] Phase 1: design, sign-in, lesson data, workspace + spoiler-proof tutor, Home stats
 - [x] Layout works on both phone and computer
